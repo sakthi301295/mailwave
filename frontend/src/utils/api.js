@@ -1,9 +1,13 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: "/api",
+  baseURL:
+    process.env.NODE_ENV === "production"
+      ? "https://mailwave-xub2.onrender.com/api"
+      : "http://localhost:5000/api",
+
   headers: {
-    "Content-Type": "application/json"
+    "Content-Type": "application/json",
   },
 });
 
