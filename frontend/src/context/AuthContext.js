@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../utils/api';
-await api.post("/auth/register", payload);
+
+// ✅ Line 3 deleted
 
 const AuthContext = createContext(null);
 
@@ -18,55 +19,26 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    console.log("Calling login API...");
-
-    const res = await api.post('/auth/login', {
-      email,
-      password
-    });
-
-    console.log("Login Response:", res.data);
-
+    const res = await api.post('/auth/login', { email, password });
     localStorage.setItem('mailwave_token', res.data.token);
     localStorage.setItem('mailwave_user', JSON.stringify(res.data.user));
-
     setUser(res.data.user);
-
     return res.data;
   };
 
   const register = async (name, email, password) => {
-  const response = await fetch(
-    "http://localhost:5000/api/auth/register",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name,
-        email,
-        password,
-      }),
+    // ✅ Use api instead of hardcoded localhost
+    const res = await api.post('/auth/register', { name, email, password });
+
+    if (res.status !== 200 && res.status !== 201) {
+      throw res.data;
     }
-  );
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw data;
-  }
-
-  localStorage.setItem("mailwave_token", data.token);
-  localStorage.setItem(
-    "mailwave_user",
-    JSON.stringify(data.user)
-  );
-
-  setUser(data.user);
-
-  return data;
-};
+    localStorage.setItem('mailwave_token', res.data.token);
+    localStorage.setItem('mailwave_user', JSON.stringify(res.data.user));
+    setUser(res.data.user);
+    return res.data;
+  };
 
   const logout = () => {
     localStorage.removeItem('mailwave_token');

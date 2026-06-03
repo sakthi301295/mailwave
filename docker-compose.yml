@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+
+  db:
+    image: mysql:8
+    container_name: mailwave-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: mailwave
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backend/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+
+  backend:
+    build: ./backend
+    container_name: mailwave-backend
+    restart: always
+    ports:
+      - "5001:5000"
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: root123
+      DB_NAME: mailwave
+      DB_PORT: 3306
+      JWT_SECRET: your_jwt_secret_here
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: 587
+      SMTP_USER: your_gmail@gmail.com
+      SMTP_PASS: your_app_password
+    depends_on:
+      - db
+
+  frontend:
+    build: ./frontend
+    container_name: mailwave-frontend
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
